@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from types import CellType
 import glfw
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -83,7 +84,7 @@ shader = OpenGL.GL.shaders.compileProgram(
 exitProgram = False
 
 sky_choice = random.choice([1, 2])
-sky_choice = 1
+sky_choice = 2
 if sky_choice == 1:
 	skyBox = SkyBox("assets/right.jpg", "assets/left.jpg", "assets/top.jpg", 
 					"assets/bottom.jpg", "assets/front.jpg", "assets/back.jpg")
@@ -466,17 +467,29 @@ while not glfw.window_should_close(window) and not exitProgram:
 		directionReal = 15*elapsedTime*5
 	camera.move(directionTry)
 
+	#print(camera.dirX, camera.dirZ)
+	"""Space lenyomására lerak elénk valamit (most egy kockát) """
+	if glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
+		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
+		if not world.isSomething(cellFrontX, cellFrontZ):
+			try: 
+				world.table[cellFrontX][cellFrontZ] = world.getObjectType("WALL")
+			except IndexError: continue
+
 	cellX, cellZ = camera.getCellPosition(20)
+
+	#print(cellX, cellZ) # ebben a cellában vagyunk
 	collision = False
 	if world.isSomething(cellZ, cellX):
-		collision = True
+		#collision = True 
+		pass
 	camera.undo()
 	if not collision:
 		camera.move(directionReal)
 
 
 	#print(world.getCellType(cellZ, cellX))
-
+	# print(camera.getCellPosition(20), camera.getFrontCellPosition(20)) # megmutatja mostani cellankat, es amelyik elottunk van
 
 	glClearDepth(1.0)
 	glClearColor(0, 0.1, 0.1, 1)

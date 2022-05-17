@@ -149,6 +149,13 @@ class Map:
 
 		self.cellSize = 20
 
+	def getObjectType(self, name):
+		"""Visszaadja a kért ObjectTypeot, mivel nem engedi használni importálva más fájlban..."""
+		if name == "TREE":
+			return ObjectType.TREE
+		if name == "WALL":
+			return ObjectType.WALL
+
 	def setLightPos(self, x, y, z):
 		self.lightX = x
 		self.lightY = y
