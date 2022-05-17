@@ -7,6 +7,7 @@ import pyrr
 from enum import Enum
 from Texture import Texture
 from ObjLoader import ObjLoader
+import random
 
 class ObjectType(Enum):
 	NOTHING = 0,
@@ -71,9 +72,11 @@ class Map:
 				self.table[ (i+1)*2 ][ (j+1)*2 ] = ObjectType.WALL
 		"""
 
-		self.table[1][1] = ObjectType.BOMB
-		self.table[1][5] = ObjectType.TREE
-		self.table[2][3] = ObjectType.TREE
+		for i in range(0, height):
+			for j in range(0, width):
+				random_num = random.choice([0,1]) # igy 50% az eselye, hogy egy cellaban fa lesz
+				if random_num == 0 and not self.isSomething(i,j):
+					self.table[ (i+1)*2 ][ (j+1)*2 ] = ObjectType.TREE
 
 		# bomb
 		vertices = createSphere(5, 50, 50)
@@ -230,6 +233,8 @@ class Map:
 		glEnableVertexAttribArray(texture_loc)
 		glVertexAttribPointer(texture_loc, 2, GL_FLOAT, False, 4 * 8, ctypes.c_void_p(24))
 
+		glBindBuffer(GL_ARRAY_BUFFER, 0)
+
 		self.bombTexture.activate()
 		for row in range(0, self.height):
 			for col in range(0, self.width):
@@ -264,6 +269,8 @@ class Map:
 					worldMat = pyrr.matrix44.multiply(scaleMat, transMat)
 					glUniformMatrix4fv(world_loc, 1, GL_FALSE, worldMat)
 					glDrawArrays(GL_TRIANGLES, 0, len(self.tree_indices))
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0)
 
 		glUseProgram(0)
 
