@@ -6,12 +6,14 @@ import numpy
 import pyrr
 from enum import Enum
 from Texture import Texture
+from ObjLoader import ObjLoader
 
 class ObjectType(Enum):
 	NOTHING = 0,
 	WALL = 1,
 	BOX = 2,
-	BOMB = 3
+	BOMB = 3,
+	TREE = 4
 
 def getSpherePoint(radius, vertIndex, horizIndex, vertSlices, horizSlices):
 	# eszaki sark:
@@ -68,9 +70,10 @@ class Map:
 			for j in range(0, width):
 				self.table[ (i+1)*2 ][ (j+1)*2 ] = ObjectType.WALL
 		"""
+
 		self.table[1][1] = ObjectType.BOMB
-		self.table[1][5] = ObjectType.BOMB
-		self.table[2][3] = ObjectType.BOMB
+		self.table[1][5] = ObjectType.TREE
+		self.table[2][3] = ObjectType.TREE
 
 		# bomb
 		vertices = createSphere(5, 50, 50)
@@ -81,6 +84,7 @@ class Map:
 		glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
 		glBindBuffer(GL_ARRAY_BUFFER, 0)
 
+		# kocka
 		vertices = [0.0, 1.0, 1.0,  0, 1, 0, 0, 0,
 	                 1.0, 1.0, 1.0,  0, 1, 0, 0, 1,
 				 	 1.0, 1.0,0.0,  0, 1, 0, 1, 1,
@@ -111,13 +115,19 @@ class Map:
 				     1.0,   1.0,  0.0, 0, 0, -1, 1, 1,
 				    0.0,   1.0,  0.0, 0, 0, -1, 1, 0]
 
-
-		# kocka
 		vertices = numpy.array(vertices, dtype=numpy.float32)
 		self.buffer = glGenBuffers(1)
 		glBindBuffer(GL_ARRAY_BUFFER, self.buffer)
 		glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
 		glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+		# tree object
+		self.tree_indices, self.tree_buffer = ObjLoader.load_model("assets/tree.obj")
+		self.tree_vbo = glGenBuffers(1)
+		glBindBuffer(GL_ARRAY_BUFFER, self.tree_vbo)
+		glBufferData(GL_ARRAY_BUFFER, self.tree_buffer.nbytes, self.tree_buffer, GL_STATIC_DRAW)
+		glBindBuffer(GL_ARRAY_BUFFER, 0)		
+
 
 		with open("shaders/cube.vert") as f:
 			vertex_shader = f.read()
@@ -130,8 +140,9 @@ class Map:
 			OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
     		OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
 		)
-		self.wallTexture = Texture("assets/metal.png")
+		self.wallTexture = Texture("assets/brick.jpg")
 		self.bombTexture = Texture("assets/bomb.png")
+		self.treeTexture = Texture("assets/tree.png")
 
 		self.cellSize = 20
 
@@ -227,6 +238,32 @@ class Map:
 						pyrr.Vector3([col*self.cellSize + self.cellSize / 2, -5, row*self.cellSize + self.cellSize / 2 ]))
 					glUniformMatrix4fv(world_loc, 1, GL_FALSE, transMat)
 					glDrawArrays(GL_QUADS, 0, self.sphereVertCount)
+
+		# fa renderelese
+		glBindBuffer(GL_ARRAY_BUFFER, self.tree_vbo)
+
+		position_loc = glGetAttribLocation(self.shader, 'in_position')
+		glEnableVertexAttribArray(position_loc)
+		glVertexAttribPointer(position_loc, 3, GL_FLOAT, False, self.tree_buffer.itemsize * 8, ctypes.c_void_p(0))
+
+		normal_loc = glGetAttribLocation(self.shader, 'in_normal')
+		glEnableVertexAttribArray(normal_loc)
+		glVertexAttribPointer(normal_loc, 3, GL_FLOAT, False, self.tree_buffer.itemsize * 8, ctypes.c_void_p(12))
+
+		texture_loc = glGetAttribLocation(self.shader, 'in_texture')
+		glEnableVertexAttribArray(texture_loc)
+		glVertexAttribPointer(texture_loc, 2, GL_FLOAT, False, self.tree_buffer.itemsize * 8, ctypes.c_void_p(24))
+
+		self.treeTexture.activate()
+		for row in range(0, self.height):
+			for col in range(0, self.width):
+				if self.table[row][col] == ObjectType.TREE:
+					transMat = pyrr.matrix44.create_from_translation(
+						pyrr.Vector3([col*self.cellSize + self.cellSize / 2, -10, row*self.cellSize + self.cellSize / 2 ]))
+					scaleMat = pyrr.matrix44.create_from_scale([self.cellSize/2, self.cellSize/2, self.cellSize/2])
+					worldMat = pyrr.matrix44.multiply(scaleMat, transMat)
+					glUniformMatrix4fv(world_loc, 1, GL_FALSE, worldMat)
+					glDrawArrays(GL_TRIANGLES, 0, len(self.tree_indices))
 
 		glUseProgram(0)
 
