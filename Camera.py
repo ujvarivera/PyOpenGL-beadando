@@ -32,7 +32,7 @@ class Camera:
 		self.prevY = self.y
 		self.prevZ = self.z
 		self.x += self.dirX * dist
-		#self.y += self.dirY * dist
+		self.y += self.dirY * dist # ha nem akarunk le-fel mozogni comment out
 		self.z += self.dirZ * dist
 
 	def undo(self):

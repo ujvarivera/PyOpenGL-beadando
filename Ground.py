@@ -27,10 +27,10 @@ class Ground:
 		glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
 		glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-		with open("ground.vert") as f:
+		with open("shaders/ground.vert") as f:
 			vertex_shader = f.read()
 
-		with open("ground.frag") as f:
+		with open("shaders/ground.frag") as f:
 			fragment_shader = f.read()
 
 		# A fajlbol beolvasott stringeket leforditjuk, es a ket shaderbol egy shader programot gyartunk.
@@ -39,7 +39,7 @@ class Ground:
     		OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
 		)
 
-		self.texture = Texture("Grass_Ground_Texture.png")
+		self.texture = Texture("assets/Grass_Ground_Texture.png")
 	
 	def render(self, viewMatrix, projectionMatrix):
 		glUseProgram(self.shader)

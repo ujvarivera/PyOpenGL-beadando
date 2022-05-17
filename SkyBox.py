@@ -13,10 +13,10 @@ class SkyBox:
 		self.frontTextureFile = front
 		self.backTextureFile = back
 
-		with open("vertex_shader_cubemap.vert") as f:
+		with open("shaders/vertex_shader_cubemap.vert") as f:
 			vertex_shader = f.read()
 
-		with open("fragment_shader_cubemap.frag") as f:
+		with open("shaders/fragment_shader_cubemap.frag") as f:
 			fragment_shader = f.read()
 
 		self.shader = compileProgram(

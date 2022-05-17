@@ -14,6 +14,7 @@ from Camera import Camera
 from Ground import Ground
 from Map import Map
 from Map import ObjectType
+import random
 
 xPosPrev = 0
 yPosPrev = 0
@@ -63,11 +64,11 @@ glViewport(0, 0, 1280, 720)
 
 camera = Camera(110, 0, 110)
 
-with open("vertex_shader_texture.vert") as f:
+with open("shaders/vertex_shader_texture.vert") as f:
 	vertex_shader = f.read()
 	#print(vertex_shader)
 
-with open("fragment_shader_texture.frag") as f:
+with open("shaders/fragment_shader_texture.frag") as f:
 	fragment_shader = f.read()
 	#print(fragment_shader)
 
@@ -81,8 +82,14 @@ shader = OpenGL.GL.shaders.compileProgram(
 
 exitProgram = False
 
-skyBox = SkyBox("right.jpg", "left.jpg", "top.jpg", 
-				"bottom.jpg", "front.jpg", "back.jpg")
+sky_choice = random.choice([1, 2])
+sky_choice = 1
+if sky_choice == 1:
+	skyBox = SkyBox("assets/right.jpg", "assets/left.jpg", "assets/top.jpg", 
+					"assets/bottom.jpg", "assets/front.jpg", "assets/back.jpg")
+if sky_choice == 2:
+	skyBox = SkyBox("assets/forest_posx.jpg", "assets/forest_negx.jpg", "assets/forest_posy.jpg", 
+					"assets/forest_negy.jpg", "assets/forest_posz.jpg", "assets/forest_negz.jpg")
 
 texture = glGenTextures(1)
 glBindTexture(GL_TEXTURE_2D, texture)
@@ -95,7 +102,7 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
 # load image
-image = Image.open("earth.jpg")
+image = Image.open("assets/earth.jpg")
 #image = image.transpose(Image.FLIP_TOP_BOTTOM)
 img_data = image.convert("RGBA").tobytes()
 # img_data = np.array(image.getdata(), np.uint8) # second way of getting the raw image data
@@ -203,8 +210,8 @@ glUseProgram(shader)
 lightX = -200.0
 lightY = 200.0
 lightZ = 100.0
-lightPos_loc = glGetUniformLocation(shader, 'lightPos');
-viewPos_loc = glGetUniformLocation(shader, 'viewPos');
+lightPos_loc = glGetUniformLocation(shader, 'lightPos')
+viewPos_loc = glGetUniformLocation(shader, 'viewPos')
 
 glUniform3f(lightPos_loc, lightX, lightY, lightZ)
 glUniform3f(viewPos_loc, camera.x, camera.y, camera.z )

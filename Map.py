@@ -119,10 +119,10 @@ class Map:
 		glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
 		glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-		with open("cube.vert") as f:
+		with open("shaders/cube.vert") as f:
 			vertex_shader = f.read()
 
-		with open("cube.frag") as f:
+		with open("shaders/cube.frag") as f:
 			fragment_shader = f.read()
 
 		# A fajlbol beolvasott stringeket leforditjuk, es a ket shaderbol egy shader programot gyartunk.
@@ -130,8 +130,8 @@ class Map:
 			OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
     		OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
 		)
-		self.wallTexture = Texture("metal.png")
-		self.bombTexture = Texture("bomb.png")
+		self.wallTexture = Texture("assets/metal.png")
+		self.bombTexture = Texture("assets/bomb.png")
 
 		self.cellSize = 20
 
