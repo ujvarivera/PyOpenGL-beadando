@@ -155,6 +155,8 @@ class Map:
 			return ObjectType.TREE
 		if name == "WALL":
 			return ObjectType.WALL
+		if name == "NOTHING":
+			return ObjectType.NOTHING
 
 	def setLightPos(self, x, y, z):
 		self.lightX = x

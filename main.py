@@ -37,6 +37,23 @@ def cursorCallback(window, xPos, yPos):
 	xPosPrev = xPos
 	yPosPrev = yPos
 
+def mouseButtonCallback(window, button, action, mods):
+	"""kocka lerakasa bal egergombra """
+	if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS:
+		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
+		if not world.isSomething(cellFrontZ, cellFrontX):
+			try: 
+				world.table[cellFrontZ][cellFrontX] = world.getObjectType("WALL")
+			except IndexError: pass
+
+
+	"""kockak visszaszedese jobb egergombra"""
+	if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.PRESS:
+		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
+		if world.getCellType(cellFrontZ, cellFrontX) == world.getObjectType("WALL"):
+			world.table[cellFrontZ][cellFrontX] = world.getObjectType("NOTHING")
+
+
 # Atallitjuk az eleresi utat az aktualis fajlhoz
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -54,7 +71,7 @@ if not window:
 
 glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 glfw.set_cursor_pos_callback(window, cursorCallback)	
-
+glfw.set_mouse_button_callback(window, mouseButtonCallback)
 glfw.make_context_current(window)
 glEnable(GL_DEPTH_TEST)
 glViewport(0, 0, 1280, 720)
@@ -468,13 +485,6 @@ while not glfw.window_should_close(window) and not exitProgram:
 	camera.move(directionTry)
 
 	#print(camera.dirX, camera.dirZ)
-	"""Space lenyomására lerak elénk valamit (most egy kockát) """
-	if glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
-		if not world.isSomething(cellFrontZ, cellFrontX):
-			try: 
-				world.table[cellFrontZ][cellFrontX] = world.getObjectType("WALL")
-			except IndexError: continue
 
 	cellX, cellZ = camera.getCellPosition(20)
 
