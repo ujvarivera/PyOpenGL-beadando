@@ -14,7 +14,8 @@ class ObjectType(Enum):
 	WALL = 1,
 	BOX = 2,
 	BOMB = 3,
-	TREE = 4
+	TREE = 4,
+	MONSTER = 5
 
 def getSpherePoint(radius, vertIndex, horizIndex, vertSlices, horizSlices):
 	# eszaki sark:
@@ -66,6 +67,8 @@ class Map:
 			self.table[0][i] = ObjectType.WALL
 			self.table[self.height - 1][i] = ObjectType.WALL
 		
+		self.table[5][5] = ObjectType.MONSTER
+
 		"""
 		for i in range(0, height):
 			for j in range(0, width):
@@ -131,6 +134,12 @@ class Map:
 		glBufferData(GL_ARRAY_BUFFER, self.tree_buffer.nbytes, self.tree_buffer, GL_STATIC_DRAW)
 		glBindBuffer(GL_ARRAY_BUFFER, 0)		
 
+		#monster - monkey object
+		self.monster_indices, self.monster_buffer = ObjLoader.load_model("assets/monkey.obj")
+		self.monster_vbo = glGenBuffers(1)
+		glBindBuffer(GL_ARRAY_BUFFER, self.monster_vbo)
+		glBufferData(GL_ARRAY_BUFFER, self.monster_buffer.nbytes, self.monster_buffer, GL_STATIC_DRAW)
+		glBindBuffer(GL_ARRAY_BUFFER, 0)		
 
 		with open("shaders/cube.vert") as f:
 			vertex_shader = f.read()
@@ -146,6 +155,7 @@ class Map:
 		self.wallTexture = Texture("assets/brick.jpg")
 		self.bombTexture = Texture("assets/bomb.png")
 		self.treeTexture = Texture("assets/tree.png")
+		self.monsterTexture = Texture("assets/monkey.jpg")
 
 		self.cellSize = 20
 
@@ -278,6 +288,35 @@ class Map:
 					worldMat = pyrr.matrix44.multiply(scaleMat, transMat)
 					glUniformMatrix4fv(world_loc, 1, GL_FALSE, worldMat)
 					glDrawArrays(GL_TRIANGLES, 0, len(self.tree_indices))
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+		#ellenseg renderelese - most egy majomfej
+		glBindBuffer(GL_ARRAY_BUFFER, self.monster_vbo)
+
+		position_loc = glGetAttribLocation(self.shader, 'in_position')
+		glEnableVertexAttribArray(position_loc)
+		glVertexAttribPointer(position_loc, 3, GL_FLOAT, False, self.monster_buffer.itemsize * 8, ctypes.c_void_p(0))
+
+		normal_loc = glGetAttribLocation(self.shader, 'in_normal')
+		glEnableVertexAttribArray(normal_loc)
+		glVertexAttribPointer(normal_loc, 3, GL_FLOAT, False, self.monster_buffer.itemsize * 8, ctypes.c_void_p(12))
+
+		texture_loc = glGetAttribLocation(self.shader, 'in_texture')
+		glEnableVertexAttribArray(texture_loc)
+		glVertexAttribPointer(texture_loc, 2, GL_FLOAT, False, self.monster_buffer.itemsize * 8, ctypes.c_void_p(24))
+
+		self.monsterTexture.activate()
+
+		for row in range(0, self.height):
+			for col in range(0, self.width):
+				if self.table[row][col] == ObjectType.MONSTER:
+					transMat = pyrr.matrix44.create_from_translation(
+						pyrr.Vector3([col*self.cellSize + self.cellSize / 2, 0, row*self.cellSize + self.cellSize / 2 ]))
+					scaleMat = pyrr.matrix44.create_from_scale([self.cellSize/2, self.cellSize/2, self.cellSize/2])
+					worldMat = pyrr.matrix44.multiply(scaleMat, transMat)
+					glUniformMatrix4fv(world_loc, 1, GL_FALSE, worldMat)
+					glDrawArrays(GL_TRIANGLES, 0, len(self.monster_indices))
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0)
 
