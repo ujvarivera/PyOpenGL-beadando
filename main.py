@@ -75,22 +75,15 @@ glfw.set_mouse_button_callback(window, mouseButtonCallback)
 glfw.make_context_current(window)
 glEnable(GL_DEPTH_TEST)
 glViewport(0, 0, 1280, 720)
-# ezekre innentol nincs szukseg, mi magunk allitjuk elo a projekcios matrixot:
-#glMatrixMode(GL_PROJECTION)
-#glLoadIdentity()
-#gluPerspective(45, 1280.0 / 720.0, 0.1, 1000.0)
 
 camera = Camera(110, 0, 110)
 
 with open("shaders/vertex_shader_texture.vert") as f:
 	vertex_shader = f.read()
-	#print(vertex_shader)
 
 with open("shaders/fragment_shader_texture.frag") as f:
 	fragment_shader = f.read()
-	#print(fragment_shader)
 
-# A fajlbol beolvasott stringeket leforditjuk, es a ket shaderbol egy shader programot gyartunk.
 shader = OpenGL.GL.shaders.compileProgram(
 	OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
     OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER),
@@ -132,7 +125,6 @@ class ObjectType(Enum):
 
 selectObject = ObjectType.CUBE
 if selectObject == ObjectType.CUBE:
-	# itt mar vannak koordinatak, normal vektorok és textura koordinatak is:
 	vertices = [  0,  10,   0,  0, 1, 0, 0, 0,
 	             10,  10,   0,  0, 1, 0, 0, 1,
 				 10,  10, -10,  0, 1, 0, 1, 1,
@@ -172,20 +164,13 @@ if selectObject == ObjectType.SPHERE:
 	shapeType = GL_QUADS
 	zTranslate = -50
 
-# elokeszitjuk az OpenGL-nek a memoriat:
 vertices = numpy.array(vertices, dtype=numpy.float32)
 
 def createObject(shader):
 	glUseProgram(shader)
-	# keszitunk egy uj buffert, ez itt meg akarmi is lehet
 	vao = glGenBuffers(1)
-	# megadjuk, hogy ez egy ARRAY_BUFFER legyen (kesobb lesz mas fajta is)
 	glBindBuffer(GL_ARRAY_BUFFER, vao)
     
-	# Az OpenGL nem tudja, hogy a bufferben levo szamokat hogy kell ertelmezni
-	# A kovetkezo 3 sor ezert megmondja, hogy majd 3-asaval kell kiszednia bufferbpl
-	# a szamokat, és azokat a vertex shaderben levo 'position' 3-as vektorba kell mindig 
-	# betolteni.
 	position_loc = glGetAttribLocation(shader, 'in_position')
 	glEnableVertexAttribArray(position_loc)
 	glVertexAttribPointer(position_loc, 3, GL_FLOAT, False, vertices.itemsize * 8, ctypes.c_void_p(0))
@@ -199,30 +184,23 @@ def createObject(shader):
 	glVertexAttribPointer(texture_loc, 2, GL_FLOAT, False, vertices.itemsize * 8, ctypes.c_void_p(24))
 
 
-	# Feltoltjuk a buffert a szamokkal.
 	glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
     
-	# Ideiglenesen inaktivaljuk a buffert, hatha masik objektumot is akarunk csinalni.
 	glBindBuffer(GL_ARRAY_BUFFER, 0)
 
 	return vao
 
 def renderModel(vao, vertCount, shapeType):
-	# Mindig 1 GL_ARRAY_BUFFER lehet aktiv, most megmondjuk, hogy melyik legyen az
 	glBindBuffer(GL_ARRAY_BUFFER, vao)
 	
 	position_loc = glGetAttribLocation(shader, 'in_position')
 	glEnableVertexAttribArray(position_loc)
 	glVertexAttribPointer(position_loc, 3, GL_FLOAT, False, vertices.itemsize * 8, ctypes.c_void_p(0))
 
-
-	# Kirajzoljuk a buffert, a 0. vertextol kezdve, 24-et ( a kockanak 6 oldala van, minden oldalhoz 4 csucs).
 	glDrawArrays(shapeType, 0, vertCount)
 
 perspMat = pyrr.matrix44.create_perspective_projection_matrix(45.0, 1280.0 / 720.0, 0.1, 100.0)
 
-# Kijeloljuk, hogy melyik shader programot szeretnenk hasznalni. Tobb is lehet a programunkban,
-# ha esetleg a programunk kulonbozo tipusu anyagokat szeretne megjeleniteni.
 glUseProgram(shader)
 
 lightX = -200.0
@@ -445,16 +423,12 @@ if materialType is Material.YELLOW_RUBBER:
 	glUniform3f(materialEmissionColor_loc, 0.0, 0.0, 0.0)
 	glUniform1f(materialShine_loc, 10)	
 
-# Lekerdezzuk a shaderben levo 'projection' es 'modelView' matrixok helyet, hogy majd 
-# innen kivulrol fel tudjuk tolteni oket adatokkal.
 perspectiveLocation = glGetUniformLocation(shader, "projection")
 worldLocation = glGetUniformLocation(shader, "world")
 viewLocation = glGetUniformLocation(shader, "view")
 viewWorldLocation = glGetUniformLocation(shader, "viewWorld")
 
-# Eloallitunk egy projekcios matrixot, a parameterezes ugyanaz, mint a gluPerspective-nek
 perspMat = pyrr.matrix44.create_perspective_projection_matrix(45.0, 1280.0 / 720.0, 0.1, 1000.0)
-# Atadjuk az eloallitott matrixot a shader-ben levo 'projection' matrixnak
 glUniformMatrix4fv(perspectiveLocation, 1, GL_FALSE, perspMat)
 
 cube = createObject(shader)
@@ -484,60 +458,38 @@ while not glfw.window_should_close(window) and not exitProgram:
 		directionReal = 15*elapsedTime*5
 	camera.move(directionTry)
 
-	#print(camera.dirX, camera.dirZ)
-
 	cellX, cellZ = camera.getCellPosition(20)
 
-	#print(cellX, cellZ) # ebben a cellában vagyunk
 	collision = False
-	if world.isSomething(cellZ, cellX):
-		#collision = True 
+	if world.isSomething(cellZ, cellX) and world.getCellType(cellZ, cellX) != world.getObjectType("MONSTER"):
+		collision = True 
 		pass
 	camera.undo()
 	if not collision:
 		camera.move(directionReal)
 
-
-	#print(world.getCellType(cellZ, cellX))
-	# print(camera.getCellPosition(20), camera.getFrontCellPosition(20)) # megmutatja mostani cellankat, es amelyik elottunk van
+	if world.getCellType(cellZ, cellX) == world.getObjectType("MONSTER"):
+		print("Meghaltál!")
+		exitProgram = True
 
 	glClearDepth(1.0)
 	glClearColor(0, 0.1, 0.1, 1)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
 
-	#transMat = pyrr.matrix44.create_from_translation(pyrr.Vector3([0, 0, 0.0]))
-	#rotMatY = pyrr.matrix44.create_from_y_rotation(math.radians(angle*0))
-	#rotMatX = pyrr.matrix44.create_from_x_rotation(math.radians(angle))
-	#rotMat = pyrr.matrix44.multiply(rotMatY, rotMatX)
-	#modelMat = pyrr.matrix44.multiply(rotMat, transMat)
 	skyBox.render(perspMat, camera.getMatrixForCubemap() )
 
 	ground.render(camera.getMatrix(), perspMat)
 	world.render(camera, perspMat)
 
 	glUseProgram(shader)
-	# Innentol kezdve ezekre se lesz szukseg, megoldjuk mashogy:
-	#glMatrixMode(GL_MODELVIEW)
-	#glLoadIdentity()
+
 	transMat = pyrr.matrix44.create_from_translation(pyrr.Vector3([0, 0, zTranslate]))
 	rotMatY = pyrr.matrix44.create_from_y_rotation(math.radians(angle*0))
 	rotMatX = pyrr.matrix44.create_from_x_rotation(math.radians(angle))
 	rotMat = pyrr.matrix44.multiply(rotMatY, rotMatX)
 	
-	# vagy akar a glRotatef-et is helyettesithetjuk
-	# FONTOS!! A Vector3 konstruktoraban lathato szamok lebegopontosak legyenek, azaz 
-	# mindenkeppen szerepeljen bennuk egy . is, vagy .0 vegzodes (meg ha egeszeket is adunk meg),
-	# kulonben hibas lesz a matrix.
-
 	rotMat = pyrr.matrix44.create_from_axis_rotation(pyrr.Vector3([1., 1., 1.0]), math.radians(angle))
 	
-	# Ez hibas... just Python things :(
-	#rotMat = pyrr.matrix44.create_from_axis_rotation(pyrr.Vector3([1, 1, 1]), math.radians(angle))
-
-	# Ezekre se lesz szukseg, megoldjuk mashogy:
-	#glTranslatef(0, 0, -50)
-	#glScalef(0.1, 0.1, 0.1)
-	#glRotatef(angle, 1, 1, 1)
 	angle += 1
 
 	glUniform3f(viewPos_loc, camera.x, camera.y, camera.z )	
@@ -552,12 +504,10 @@ while not glfw.window_should_close(window) and not exitProgram:
 	skybox_loc = glGetUniformLocation(shader, "skybox")
 	glUniform1i(skybox_loc, 0)
 	skyBox.activateCubeMap(shader, 1)
-	#renderModel(cube, vertCount, shapeType)
 
 	glfw.swap_buffers(window)
 	
 	endTime = glfw.get_time()
 	elapsedTime = endTime - startTime 
-	#print(int(1.0 / elapsedTime))
 
 glfw.terminate()

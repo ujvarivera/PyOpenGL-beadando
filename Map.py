@@ -67,7 +67,7 @@ class Map:
 			self.table[0][i] = ObjectType.WALL
 			self.table[self.height - 1][i] = ObjectType.WALL
 		
-		self.table[5][5] = ObjectType.MONSTER
+		self.table[10][10] = ObjectType.MONSTER
 
 		"""
 		for i in range(0, height):
@@ -147,7 +147,6 @@ class Map:
 		with open("shaders/cube.frag") as f:
 			fragment_shader = f.read()
 
-		# A fajlbol beolvasott stringeket leforditjuk, es a ket shaderbol egy shader programot gyartunk.
 		self.shader = OpenGL.GL.shaders.compileProgram(
 			OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
     		OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
@@ -167,6 +166,8 @@ class Map:
 			return ObjectType.WALL
 		if name == "NOTHING":
 			return ObjectType.NOTHING
+		if name == "MONSTER":
+			return ObjectType.MONSTER
 
 	def setLightPos(self, x, y, z):
 		self.lightX = x
