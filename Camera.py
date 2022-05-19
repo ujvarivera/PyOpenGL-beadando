@@ -45,8 +45,7 @@ class Camera:
 
 	def getFrontCellPosition(self, cellSize):
 		"""Visszaadja a pont elottunk levo cellat"""
-		return int(self.x / cellSize + round(self.dirX) / cellSize), int(self.z / cellSize + round(self.dirZ) / cellSize)
-		#return int((self.x + self.dirX) / cellSize), int((self.z + self.dirZ) / cellSize)
+		return int((self.x + self.dirX * cellSize) / cellSize), int((self.z + self.dirZ * cellSize) / cellSize)
 
 
 	def __update(self):

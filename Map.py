@@ -75,7 +75,7 @@ class Map:
 		for i in range(0, height):
 			for j in range(0, width):
 				random_num = random.choice([0,1]) # igy 50% az eselye, hogy egy cellaban fa lesz
-				if random_num == 0 and not self.isSomething(i,j):
+				if random_num == 0 and not self.isSomething((i+1)*2, (j+1)*2):
 					self.table[ (i+1)*2 ][ (j+1)*2 ] = ObjectType.TREE
 
 		# bomb

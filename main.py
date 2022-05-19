@@ -471,9 +471,9 @@ while not glfw.window_should_close(window) and not exitProgram:
 	"""Space lenyomására lerak elénk valamit (most egy kockát) """
 	if glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
 		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
-		if not world.isSomething(cellFrontX, cellFrontZ):
+		if not world.isSomething(cellFrontZ, cellFrontX):
 			try: 
-				world.table[cellFrontX][cellFrontZ] = world.getObjectType("WALL")
+				world.table[cellFrontZ][cellFrontX] = world.getObjectType("WALL")
 			except IndexError: continue
 
 	cellX, cellZ = camera.getCellPosition(20)
