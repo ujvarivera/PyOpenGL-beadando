@@ -67,7 +67,11 @@ class Map:
 			self.table[0][i] = ObjectType.WALL
 			self.table[self.height - 1][i] = ObjectType.WALL
 		
-		self.table[10][10] = ObjectType.MONSTER
+		self.monsterDirX = random.randint(-1, 1)
+		self.monsterDirZ = random.randint(-1, 1)
+		self.monsterX = 7
+		self.monsterZ = 10
+		self.table[self.monsterZ][self.monsterX] = ObjectType.MONSTER
 
 		"""
 		for i in range(0, height):
@@ -155,6 +159,7 @@ class Map:
 		self.bombTexture = Texture("assets/bomb.png")
 		self.treeTexture = Texture("assets/tree.png")
 		self.monsterTexture = Texture("assets/monkey.jpg")
+		self.boxTexture = Texture("assets/minecraft_box.jpg")
 
 		self.cellSize = 20
 
@@ -168,6 +173,8 @@ class Map:
 			return ObjectType.NOTHING
 		if name == "MONSTER":
 			return ObjectType.MONSTER
+		if name == "BOX":
+			return ObjectType.BOX
 
 	def setLightPos(self, x, y, z):
 		self.lightX = x
@@ -229,6 +236,18 @@ class Map:
 		for row in range(0, self.height):
 			for col in range(0, self.width):
 				if self.table[row][col] == ObjectType.WALL:
+					transMat = pyrr.matrix44.create_from_translation(
+						pyrr.Vector3([col*self.cellSize, -10, row*self.cellSize]))
+					scaleMat = pyrr.matrix44.create_from_scale([self.cellSize, self.cellSize, self.cellSize])
+					worldMat = pyrr.matrix44.multiply(scaleMat, transMat)
+					glUniformMatrix4fv(world_loc, 1, GL_FALSE, worldMat)
+					glDrawArrays(GL_QUADS, 0, 24)
+
+		# dobozok (amiket lerakhatsz-felszedhetsz) renderelese
+		self.boxTexture.activate()
+		for row in range(0, self.height):
+			for col in range(0, self.width):
+				if self.table[row][col] == ObjectType.BOX:
 					transMat = pyrr.matrix44.create_from_translation(
 						pyrr.Vector3([col*self.cellSize, -10, row*self.cellSize]))
 					scaleMat = pyrr.matrix44.create_from_scale([self.cellSize, self.cellSize, self.cellSize])
@@ -333,3 +352,9 @@ class Map:
 		if self.table[row][col] == ObjectType.NOTHING:
 			return False
 		return True
+
+	def getMonsterCellPos(self):
+		return self.monsterX, self.monsterZ
+
+	def getMonsterFrontCells(self):
+		return self.monsterX + self.monsterDirX, self.monsterZ + self.monsterDirZ

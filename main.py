@@ -43,14 +43,14 @@ def mouseButtonCallback(window, button, action, mods):
 		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
 		if not world.isSomething(cellFrontZ, cellFrontX):
 			try: 
-				world.table[cellFrontZ][cellFrontX] = world.getObjectType("WALL")
+				world.table[cellFrontZ][cellFrontX] = world.getObjectType("BOX")
 			except IndexError: pass
 
 
 	"""kockak visszaszedese jobb egergombra"""
 	if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.PRESS:
 		cellFrontX, cellFrontZ = camera.getFrontCellPosition(20)
-		if world.getCellType(cellFrontZ, cellFrontX) == world.getObjectType("WALL"):
+		if world.getCellType(cellFrontZ, cellFrontX) == world.getObjectType("BOX"):
 			world.table[cellFrontZ][cellFrontX] = world.getObjectType("NOTHING")
 
 
@@ -472,6 +472,22 @@ while not glfw.window_should_close(window) and not exitProgram:
 		print("Meghaltál!")
 		exitProgram = True
 
+	"""
+	monsterX,monsterZ = world.getMonsterCellPos()
+	print(world.getCellType(monsterZ, monsterX))
+	"""
+	
+	monsterX,monsterZ = world.getMonsterCellPos()
+	monsterFrontX, monsterFrontZ = world.getMonsterFrontCells()
+	#print(monsterZ, monsterX, monsterFrontZ, monsterFrontX)
+	
+	if not world.isSomething(monsterFrontZ, monsterFrontX):
+		world.table[monsterFrontZ][monsterFrontX] = world.getObjectType("MONSTER")
+		world.table[monsterZ][monsterX] = world.getObjectType("NOTHING")
+	else: 
+		world.monsterDirX = random.randint(-1, 1)
+		world.monsterDirZ = random.randint(-1, 1)
+	
 	glClearDepth(1.0)
 	glClearColor(0, 0.1, 0.1, 1)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
