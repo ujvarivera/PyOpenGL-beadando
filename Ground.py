@@ -39,7 +39,7 @@ class Ground:
     		OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
 		)
 
-		self.texture = Texture("assets/Grass_Ground_Texture.png")
+		self.texture = Texture("assets/pixel_green.jpg")
 	
 	def render(self, viewMatrix, projectionMatrix):
 		glUseProgram(self.shader)

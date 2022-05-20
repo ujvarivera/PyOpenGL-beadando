@@ -155,9 +155,9 @@ class Map:
 			OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
     		OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
 		)
-		self.wallTexture = Texture("assets/brick.jpg")
+		self.wallTexture = Texture("assets/pixel_wall.jpg")
 		self.bombTexture = Texture("assets/bomb.png")
-		self.treeTexture = Texture("assets/tree.png")
+		self.treeTexture = Texture("assets/pixel_darkgreen.jpg")
 		self.monsterTexture = Texture("assets/monkey.jpg")
 		self.boxTexture = Texture("assets/minecraft_box.jpg")
 

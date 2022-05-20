@@ -33,5 +33,5 @@ vec3 ambient = materialAmbientColor * lightAmbientColor;
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), materialShine);
     vec3 specular = materialSpecularColor * spec * lightSpecularColor;
     
-    out_color = texture(textureSampler, v_texture); //* 0.5 + vec4(materialEmissionColor + ambient + diffuse + specular, 1.0);
+    out_color = texture(textureSampler, v_texture) * 0.5 + vec4(materialEmissionColor + ambient + diffuse + specular, 1.0);
 }
