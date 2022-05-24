@@ -69,9 +69,9 @@ class Map:
 		
 		self.monsterDirX = random.randint(-1, 1)
 		self.monsterDirZ = random.randint(-1, 1)
-		self.monsterX = 7
-		self.monsterZ = 10
-		self.table[self.monsterZ][self.monsterX] = ObjectType.MONSTER
+		self.monsterCellX = random.randint(1, 10)
+		self.monsterCellZ = random.randint(1, 10)
+		self.table[self.monsterCellZ][self.monsterCellX] = ObjectType.MONSTER
 
 		"""
 		for i in range(0, height):
@@ -354,7 +354,7 @@ class Map:
 		return True
 
 	def getMonsterCellPos(self):
-		return self.monsterX, self.monsterZ
+		return self.monsterCellX, self.monsterCellZ
 
 	def getMonsterFrontCells(self):
-		return self.monsterX + self.monsterDirX, self.monsterZ + self.monsterDirZ
+		return self.monsterCellX + self.monsterDirX, self.monsterCellZ + self.monsterDirZ

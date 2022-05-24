@@ -16,6 +16,7 @@ from Ground import Ground
 from Map import Map
 from Map import ObjectType
 import random
+import time
 
 xPosPrev = 0
 yPosPrev = 0
@@ -480,10 +481,12 @@ while not glfw.window_should_close(window) and not exitProgram:
 	monsterX,monsterZ = world.getMonsterCellPos()
 	monsterFrontX, monsterFrontZ = world.getMonsterFrontCells()
 	#print(monsterZ, monsterX, monsterFrontZ, monsterFrontX)
-	
+
 	if not world.isSomething(monsterFrontZ, monsterFrontX):
 		world.table[monsterFrontZ][monsterFrontX] = world.getObjectType("MONSTER")
 		world.table[monsterZ][monsterX] = world.getObjectType("NOTHING")
+		world.monsterCellX = monsterFrontX
+		world.monsterCellZ = monsterFrontZ
 	else: 
 		world.monsterDirX = random.randint(-1, 1)
 		world.monsterDirZ = random.randint(-1, 1)
