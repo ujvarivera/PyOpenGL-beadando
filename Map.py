@@ -69,8 +69,8 @@ class Map:
 		
 		self.monsterDirX = random.randint(-1, 1)
 		self.monsterDirZ = random.randint(-1, 1)
-		self.monsterCellX = random.randint(1, 10)
-		self.monsterCellZ = random.randint(1, 10)
+		self.monsterCellX = random.randint(1, self.height-2)
+		self.monsterCellZ = random.randint(1, self.width-2)
 		self.table[self.monsterCellZ][self.monsterCellX] = ObjectType.MONSTER
 
 		"""
