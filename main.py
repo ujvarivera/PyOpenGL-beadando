@@ -442,6 +442,8 @@ angle = 0.0
 
 elapsedTime = 0
 
+difficulty = 1 # állítsd át, ha gyorsabb szörnyet akarsz. 3-as a leggyorsabb
+
 while not glfw.window_should_close(window) and not exitProgram:
 	startTime = glfw.get_time()
 	glfw.poll_events()
@@ -481,7 +483,15 @@ while not glfw.window_should_close(window) and not exitProgram:
 	monsterX,monsterZ = world.getMonsterCellPos()
 	monsterFrontX, monsterFrontZ = world.getMonsterFrontCells()
 	#print(monsterZ, monsterX, monsterFrontZ, monsterFrontX)
-	r = random.randint(0,15) #mozgo majom lassitasa vegett
+
+	# nehezseg beallitasa: annál gyorsabb a szörny
+	if difficulty == 1:
+		r = random.randint(0,20) 
+	elif difficulty == 2:	
+		r = random.randint(0,15)
+	elif difficulty == 3:	
+		r = random.randint(0,5) 
+
 	if r == 1:
 		if not world.isSomething(monsterFrontZ, monsterFrontX):
 			world.table[monsterFrontZ][monsterFrontX] = world.getObjectType("MONSTER")
