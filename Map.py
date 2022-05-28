@@ -358,3 +358,18 @@ class Map:
 
 	def getMonsterFrontCells(self):
 		return self.monsterCellX + self.monsterDirX, self.monsterCellZ + self.monsterDirZ
+
+	def canMonsterMove(self):
+		"""Ha a szörny körbe van véve, akkor nem tud mozogni. Ekkor nyerünk."""
+		if (self.isSomething(self.monsterCellZ-1, self.monsterCellX-1) 
+		and self.isSomething(self.monsterCellZ, self.monsterCellX-1) 
+		and self.isSomething(self.monsterCellZ+1, self.monsterCellX-1) 
+		and self.isSomething(self.monsterCellZ-1, self.monsterCellX)
+		and self.isSomething(self.monsterCellZ+1, self.monsterCellX)
+		and self.isSomething(self.monsterCellZ-1, self.monsterCellX+1)
+		and self.isSomething(self.monsterCellZ, self.monsterCellX+1)
+		and self.isSomething(self.monsterCellZ+1, self.monsterCellX+1)) == True:
+			return False
+		else: 
+			return True
+

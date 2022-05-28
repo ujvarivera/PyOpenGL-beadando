@@ -481,7 +481,7 @@ while not glfw.window_should_close(window) and not exitProgram:
 	monsterX,monsterZ = world.getMonsterCellPos()
 	monsterFrontX, monsterFrontZ = world.getMonsterFrontCells()
 	#print(monsterZ, monsterX, monsterFrontZ, monsterFrontX)
-	r = random.randint(0,5) #mozgo majom lassitasa vegett
+	r = random.randint(0,15) #mozgo majom lassitasa vegett
 	if r == 1:
 		if not world.isSomething(monsterFrontZ, monsterFrontX):
 			world.table[monsterFrontZ][monsterFrontX] = world.getObjectType("MONSTER")
@@ -491,6 +491,10 @@ while not glfw.window_should_close(window) and not exitProgram:
 		else: 
 			world.monsterDirX = random.randint(-1, 1)
 			world.monsterDirZ = random.randint(-1, 1)
+
+	if not world.canMonsterMove():
+		print("Nyertél, sikeresen körbezártad a szörnyet!")
+		exitProgram = True
 	
 	glClearDepth(1.0)
 	glClearColor(0, 0.1, 0.1, 1)
