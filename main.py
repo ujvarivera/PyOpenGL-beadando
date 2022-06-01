@@ -77,6 +77,43 @@ glfw.make_context_current(window)
 glEnable(GL_DEPTH_TEST)
 glViewport(0, 0, 1280, 720)
 
+#framebuffer
+frameBuffer = glGenFramebuffers(1)
+glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
+texture = glGenTextures(1)
+glBindTexture(GL_TEXTURE_2D, texture)
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 720, 0, GL_RGB, GL_UNSIGNED_BYTE, ctypes.c_void_p(0))
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+glBindTexture(GL_TEXTURE_2D, 0)
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0)
+
+rbo = glGenRenderbuffers(1)
+glBindRenderbuffer(GL_RENDERBUFFER, rbo)
+glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 720) 
+glBindRenderbuffer(GL_RENDERBUFFER, 0)
+
+glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo)
+
+glBindFramebuffer(GL_FRAMEBUFFER, 0)
+
+#shaderek framebufferhez
+with open("shaders/screen_shader.vert") as f:
+	vertex_shader = f.read()
+
+with open("shaders/screen_shader.frag") as f:
+	fragment_shader = f.read()
+
+screen_shader = OpenGL.GL.shaders.compileProgram(
+	OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
+    OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
+)
+rectangle = glGenBuffers(1)
+glBindBuffer(GL_ARRAY_BUFFER, rectangle)
+    
+glUseProgram(0)
+
+
 camera = Camera(110, 0, 110)
 
 with open("shaders/vertex_shader_texture.vert") as f:
@@ -443,7 +480,8 @@ angle = 0.0
 elapsedTime = 0
 
 difficulty = 1 # állítsd át, ha gyorsabb szörnyet akarsz. 3-as a leggyorsabb
-
+dead = False
+win = False
 while not glfw.window_should_close(window) and not exitProgram:
 	startTime = glfw.get_time()
 	glfw.poll_events()
@@ -472,8 +510,8 @@ while not glfw.window_should_close(window) and not exitProgram:
 		camera.move(directionReal)
 
 	if world.getCellType(cellZ, cellX) == world.getObjectType("MONSTER"):
-		print("Meghaltál!")
-		exitProgram = True
+		dead = True
+
 
 	"""
 	monsterX,monsterZ = world.getMonsterCellPos()
@@ -503,8 +541,7 @@ while not glfw.window_should_close(window) and not exitProgram:
 			world.monsterDirZ = random.randint(-1, 1)
 
 	if not world.canMonsterMove():
-		print("Nyertél, sikeresen körbezártad a szörnyet!")
-		exitProgram = True
+		win = True
 	
 	glClearDepth(1.0)
 	glClearColor(0, 0.1, 0.1, 1)
@@ -538,6 +575,15 @@ while not glfw.window_should_close(window) and not exitProgram:
 	skybox_loc = glGetUniformLocation(shader, "skybox")
 	glUniform1i(skybox_loc, 0)
 	skyBox.activateCubeMap(shader, 1)
+	
+	if dead or win:
+		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+		glClearDepth(1.0)
+		glClearColor(0, 0, 0, 1)
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
+		glDisable(GL_DEPTH_TEST)
+		glUseProgram(screen_shader)
+		glBindBuffer(GL_ARRAY_BUFFER, rectangle)
 
 	glfw.swap_buffers(window)
 	
