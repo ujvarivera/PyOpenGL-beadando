@@ -16,7 +16,7 @@ from Ground import Ground
 from Map import Map
 from Map import ObjectType
 import random
-import time
+from Texture import Texture
 
 xPosPrev = 0
 yPosPrev = 0
@@ -78,14 +78,18 @@ glEnable(GL_DEPTH_TEST)
 glViewport(0, 0, 1280, 720)
 
 #framebuffer
+
 frameBuffer = glGenFramebuffers(1)
 glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
+
 texture = glGenTextures(1)
 glBindTexture(GL_TEXTURE_2D, texture)
+
 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 720, 0, GL_RGB, GL_UNSIGNED_BYTE, ctypes.c_void_p(0))
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 glBindTexture(GL_TEXTURE_2D, 0)
+
 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0)
 
 rbo = glGenRenderbuffers(1)
@@ -108,11 +112,29 @@ screen_shader = OpenGL.GL.shaders.compileProgram(
 	OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
     OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
 )
+
+glUseProgram(0)
+
+# kell egy buffer a teglalapnak is:
+vertices = [
+		-1,  1, 0, 0,
+		 1,  1, 1, 0,
+		 1, -1, 1, 1,
+		-1, -1, 0, 1
+		 ]
+
+vertices = numpy.array(vertices, dtype=numpy.float32)
+
 rectangle = glGenBuffers(1)
 glBindBuffer(GL_ARRAY_BUFFER, rectangle)
     
-glUseProgram(0)
 
+
+glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
+    
+glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+##################################
 
 camera = Camera(110, 0, 110)
 
@@ -482,6 +504,8 @@ elapsedTime = 0
 difficulty = 1 # állítsd át, ha gyorsabb szörnyet akarsz. 3-as a leggyorsabb
 dead = False
 win = False
+endTexture = Texture("assets/metal.png")
+
 while not glfw.window_should_close(window) and not exitProgram:
 	startTime = glfw.get_time()
 	glfw.poll_events()
@@ -583,13 +607,24 @@ while not glfw.window_should_close(window) and not exitProgram:
 	skyBox.activateCubeMap(shader, 1)
 	
 	if dead or win:
-		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 		glClearDepth(1.0)
 		glClearColor(0, 0, 0, 1)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
 		glDisable(GL_DEPTH_TEST)
 		glUseProgram(screen_shader)
+		Texture.enableTexturing()
+		endTexture.activate()
 		glBindBuffer(GL_ARRAY_BUFFER, rectangle)
+
+		position_loc = glGetAttribLocation(screen_shader, 'in_position')
+		glEnableVertexAttribArray(position_loc)
+		glVertexAttribPointer(position_loc, 2, GL_FLOAT, False, vertices.itemsize * 4, ctypes.c_void_p(0))
+
+		texture_loc = glGetAttribLocation(screen_shader, 'in_texCoord')
+		glEnableVertexAttribArray(texture_loc)
+		glVertexAttribPointer(texture_loc, 2, GL_FLOAT, False, vertices.itemsize * 4, ctypes.c_void_p(8))
+
+		glDrawArrays(GL_QUADS, 0, 4)
 
 	glfw.swap_buffers(window)
 	
