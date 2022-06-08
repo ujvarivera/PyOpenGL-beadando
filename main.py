@@ -524,7 +524,7 @@ while not glfw.window_should_close(window) and not exitProgram:
 
 	# nehezseg beallitasa: annál gyorsabb a szörny
 	if difficulty == 1:
-		r = random.randint(0,20) 
+		r = random.randint(0,30) 
 	elif difficulty == 2:	
 		r = random.randint(0,15)
 	elif difficulty == 3:	
@@ -537,8 +537,14 @@ while not glfw.window_should_close(window) and not exitProgram:
 			world.monsterCellX = monsterFrontX
 			world.monsterCellZ = monsterFrontZ
 		else: 
+			"""
+			# ha átlósan is mozog a szörny:
 			world.monsterDirX = random.randint(-1, 1)
 			world.monsterDirZ = random.randint(-1, 1)
+			"""
+			monsterDir = random.choice([[0, -1], [1, 0], [0, 1], [-1, 0]])
+			world.monsterDirX = monsterDir[0]
+			world.monsterDirZ = monsterDir[1]
 
 	if not world.canMonsterMove():
 		win = True

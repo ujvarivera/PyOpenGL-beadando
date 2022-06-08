@@ -67,8 +67,13 @@ class Map:
 			self.table[0][i] = ObjectType.WALL
 			self.table[self.height - 1][i] = ObjectType.WALL
 		
+		"""
 		self.monsterDirX = random.randint(-1, 1)
 		self.monsterDirZ = random.randint(-1, 1)
+		"""
+		monsterDir = random.choice([[0, -1], [1, 0], [0, 1], [-1, 0]]) # azért, hogy átlósan ne tudjon mozogni
+		self.monsterDirX = monsterDir[0]
+		self.monsterDirZ = monsterDir[1]
 		self.monsterCellX = random.randint(1, self.height-2)
 		self.monsterCellZ = random.randint(1, self.width-2)
 		self.table[self.monsterCellZ][self.monsterCellX] = ObjectType.MONSTER
@@ -361,6 +366,9 @@ class Map:
 
 	def canMonsterMove(self):
 		"""Ha a szörny körbe van véve, akkor nem tud mozogni. Ekkor nyerünk."""
+
+		"""Ha átlósan is mozog a szörny, akkor ez a beállítás kell (mind a 8 oldalról körbe kell venni): """
+		"""
 		if (self.isSomething(self.monsterCellZ-1, self.monsterCellX-1) 
 		and self.isSomething(self.monsterCellZ, self.monsterCellX-1) 
 		and self.isSomething(self.monsterCellZ+1, self.monsterCellX-1) 
@@ -372,4 +380,13 @@ class Map:
 			return False
 		else: 
 			return True
+		"""
 
+		"""Ha csak függőlegesen és vízszintesen mozog a szörny (ekkor 4 irányból kell csak körbevenni): """
+		if (self.isSomething(self.monsterCellZ, self.monsterCellX-1) 
+		and self.isSomething(self.monsterCellZ-1, self.monsterCellX)
+		and self.isSomething(self.monsterCellZ+1, self.monsterCellX)
+		and self.isSomething(self.monsterCellZ, self.monsterCellX+1)) == True:
+			return False
+		else: 
+			return True
